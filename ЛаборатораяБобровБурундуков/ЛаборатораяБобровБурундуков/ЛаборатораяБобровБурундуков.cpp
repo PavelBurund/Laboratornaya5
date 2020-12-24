@@ -17,7 +17,6 @@ class Shape {
 public:
 	double virtual calcArea() = 0;
 	double virtual calcPerimeter() = 0;
-	json virtual getJson() = 0;
 };
 
 class Triangle : public Shape {
@@ -49,14 +48,6 @@ public:
 	double getSide3() {
 		return side3;
 	}
-	json virtual getJson()
-	{
-		json j;
-		j["side1"] = side1;
-		j["side2"] = side2;
-		j["side3"] = side3;
-		return j;
-	}
 };
 class Square : public Shape {
 private:
@@ -75,12 +66,6 @@ public:
 		return side * 4;
 	}
 	double getSide() { return side; }
-	json virtual getJson()
-	{
-		json j;
-		j["side"] = side;
-		return j;
-	}
 };
 class Rectangle : public Shape {
 private:
@@ -104,13 +89,6 @@ public:
 	double getHeight() {
 		return height;
 	}
-	json virtual getJson()
-	{
-		json j;
-		j["width"] = width;
-		j["height"] = height;
-		return j;
-	}
 };
 class Circle : public Shape {
 private:
@@ -129,13 +107,39 @@ public:
 		return 3.14 * 2 * radius;
 	}
 	double getRadius() { return radius; }
-	json virtual getJson()
+};
+
+template <class T>
+json getJson(T obj)
+{
+	if (typeid(T).name() == typeid(Triangle).name())
 	{
 		json j;
-		j["radius"] = radius;
+		j["side1"] = obj.getSide1();
+		j["side2"] = obj.getSide2();
+		j["side3"] = obj.getSide3();
 		return j;
 	}
-};
+	else if (typeid(T).name() == typeid(Rectangle).name())
+	{
+		json j;
+		j["width"] = obj.getWidth();
+		j["height"] = obj.getHeight();
+		return j;
+	}
+	else if (typeid(T).name() == typeid(Circle).name())
+	{
+		json j;
+		j["radius"] = obj.getRadius();
+		return j;
+	}
+	else if (typeid(T).name() == typeid(Square).name())
+	{
+		json j;
+		j["side"] = obj.getSide();
+		return j;
+	}
+}
 
 void ListToJson(list<Shape*>& shapes)
 {
@@ -150,7 +154,7 @@ void ListToJson(list<Shape*>& shapes)
 	json jsonStream;
 	jsonStream["list"] = {};
 	for (auto it = shapes.cbegin(); it != shapes.cend(); it++)
-		jsonStream["list"].push_back((*it)->getJson());
+		jsonStream["list"].push_back(getJson(*it));
 	ostream << jsonStream;
 }
 
